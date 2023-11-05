@@ -7,6 +7,7 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
   const [joinState, setJoinState] = useState(false);
   const [messages, setMessages] = useState<any>([]);
   const [members, setMembers] = useState<any>([]);
+  const [isHost, setIsHost] = useState(false);
   let display_name = sessionStorage.getItem("display_name");
   let roomName = sessionStorage.getItem("room_name");
   const [displayName, setDisplayName] = useState(display_name);
@@ -46,10 +47,25 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
     await channel.join();
 
     try {
-      let attributes = await client.getChannelAttributesByKeys(channelName, ['room_name']);
+      let attributes = await client.getChannelAttributesByKeys(channelName, ['room_name', 'host_id']);
       roomName = attributes.room_name.value;
+      let hostId = attributes.host_id.value;
+      if(hostId === USER_ID.toString()) {
+        setIsHost(true);
+        const stream_controls = document.getElementById('stream-controls') as HTMLElement
+        stream_controls.style.display = 'block'
+      }
     } catch (error) {
-      await client.setChannelAttributes(channelName, {'room_name': roomName as string, 'host': displayName as string})
+      await client.setChannelAttributes(channelName, 
+        {'room_name': roomName as string, 
+        'host': displayName as string,
+        'host_id': USER_ID.toString()
+      }
+        )
+      setIsHost(true);
+      const stream_controls = document.getElementById('stream-controls') as HTMLElement
+        stream_controls.style.display = 'block'
+
     }
     await lobbyChannel.join();
     displayName && await client.setLocalUserAttributes({
@@ -196,5 +212,5 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
   
   
   
-  return { messages, sendChannelMessage, membersPaticipate };
+  return { messages, sendChannelMessage, membersPaticipate, isHost };
 }

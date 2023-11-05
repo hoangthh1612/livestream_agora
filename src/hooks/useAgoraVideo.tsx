@@ -40,7 +40,7 @@ export default function useAgoraVideo(rtcClient: IAgoraRTCClient | undefined): P
   const [published, setPublished] = useState(false);
   const [remoteUsers, setRemoteUsers] = useState<IAgoraRTCRemoteUser[]>([]);
   const [searchParams] = useSearchParams();
-
+  
   let room = searchParams.get("room") as string;
   console.log(room);
   
@@ -138,7 +138,8 @@ export default function useAgoraVideo(rtcClient: IAgoraRTCClient | undefined): P
 
     }
     const handleUserUnpublished = (user: IAgoraRTCRemoteUser) => {
-      setRemoteUsers((remoteUsers) => Array.from(rtcClient.remoteUsers));
+      
+      //setRemoteUsers((remoteUsers) => Array.from(rtcClient.remoteUsers));
     };
     const handleUserJoined = (user: IAgoraRTCRemoteUser) => {
       setRemoteUsers((remoteUsers) => Array.from(rtcClient.remoteUsers));

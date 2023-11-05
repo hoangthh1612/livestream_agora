@@ -41,20 +41,20 @@ const VideoLivestream = (props: PropsType) => {
   return (
     <div>
       <div className="relative w-full h-[500px]">
-        <div className="w-full h-[500px]" id="video-stream"> 
-          <img
-            className={`${state?.published && `hidden `} ` + `w-full`}
+        <div className="bg-black w-full h-[500px]" id="video-stream"> 
+          {/* <img
+            className={`w-full`}
             src="https://designhub.co/wp-content/uploads/2020/09/mainfeature-758x426.jpg"
             alt=""
-          />
+          /> */}
         
         </div>
-        <div className="absolute bottom-3 left-[30%]">
-          <button className="mr-3">
-            <CameraAltOutlinedIcon fontSize="large" />
+        <div className="absolute hidden bottom-3 left-[40%]" id="stream-controls">
+          <button className="mr-3 px-2 py-1 border-[1px] border-blue-400">
+            <CameraAltOutlinedIcon className="text-red-500" fontSize="large" />
           </button>
-          <button className="mr-3">
-            <KeyboardVoiceOutlinedIcon fontSize="large" />
+          <button className="mr-3 px-2 py-1 border-[1px] border-blue-400">
+            <KeyboardVoiceOutlinedIcon className="text-red-500" fontSize="large" />
           </button>
           {
             !state.published ? (
@@ -62,7 +62,7 @@ const VideoLivestream = (props: PropsType) => {
                 Start stream
               </button>
             ):
-            <button onClick={handleStopStream} className="px-3 py-2 bg-red-400">
+            <button onClick={handleStopStream} className="px-3 py-2 bg-red-400 border-[1px] border-red-400 rounded-md">
               Stop stream
             </button>
           }

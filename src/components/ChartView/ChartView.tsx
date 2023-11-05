@@ -6,9 +6,6 @@ import Chart from 'react-apexcharts';
 function ViewChart({membersPaticipate}: {membersPaticipate: any}) {
   const categories0 = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
   const refContainer = useRef(null);
-  const [dataSource, setDataSource] = useState([]);
-  const [text, setText] = useState("");
-  const [categories, setCategories] = useState(categories0);
   const [num, setNum] = useState(0);
   const [data, setData] = useState<any>([0, 0, 0]);
 
@@ -36,7 +33,7 @@ const getData = async () => {
   
   useEffect(() => {
     
-    setTimeout(()=>{
+    const timeout = setTimeout(()=>{
       // addData();
       getData();
       setNum(getRndInteger(50, 1000));
@@ -64,7 +61,52 @@ const getData = async () => {
         }])
     
   }, [num]);
+  
 
+  // const options = {
+  //   chart: {
+  //     id: 'realtime',
+  //     height: 350,
+  //     type: 'line',
+  //     animations: {
+  //       enabled: true,
+  //       easing: 'linear',
+  //       dynamicAnimation: {
+  //         speed: 1000
+  //       }
+  //     },
+  //     toolbar: {
+  //       show: false
+  //     },
+  //     zoom: {
+  //       enabled: false
+  //     }
+  //   },
+  //   dataLabels: {
+  //     enabled: false
+  //   },
+  //   stroke: {
+  //     curve: 'smooth'
+  //   },
+  //   title: {
+  //     text: 'Dynamic Updating Chart',
+  //     align: 'left'
+  //   },
+  //   markers: {
+  //     size: 0
+  //   },
+  //   xaxis: {
+  //     type: 'datetime',
+      
+  //   },
+  //   yaxis: {
+  //     max: 100
+  //   },
+  //   legend: {
+  //     show: false
+  //     },
+  //   }
+  
 
 
 
@@ -77,10 +119,29 @@ const getData = async () => {
       {/* <div ref={refContainer} /> */}
 
       <Chart type='line'
-          // width={1450}
-          // height={550}
+          width={1000}
+          height={350}
           series={sData}
+          
           options={{
+            chart: {
+              id: 'realtime',
+                height: 350,
+                type: 'line',
+                animations: {
+                  enabled: true,
+                  easing: 'linear',
+                  dynamicAnimation: {
+                    speed: 1000
+                  }
+                },
+                toolbar: {
+                  show: false
+                },
+                zoom: {
+                  enabled: false
+                }
+            }, 
             title:{ text:"Product sell in 2021"},
             xaxis:{
                 title:{text:"Product Sell in Months"},
@@ -88,13 +149,21 @@ const getData = async () => {
             },
             yaxis:{
                 title:{text:"Product in K"}                 
-            }          
+            },
+            stroke: {
+              curve: 'smooth'
+            }, 
+            legend: {
+              show: false
+            },         
 
         }}
+          
+
           >
           </Chart>
     </div>
   );
 }
 
-export default ViewChart;
+export default ViewChart; 
