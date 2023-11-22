@@ -1,13 +1,16 @@
-import AgoraRTM, { RtmChannel } from 'agora-rtm-sdk';
+
 import React, { useEffect, useRef, useState } from 'react'
 import useAgora from '../../hooks/useAgora';
-import Room from '../../components/Room/Room';
 import { Link } from 'react-router-dom';
+import AgoraRTM from 'agora-rtm-sdk';
 
 
 
 let token: string | undefined;
 let uid = String(Math.floor(Math.random()*1232));
+const APP_ID="b8c5abca5a9a4fbc987e2efe3bb374c6"
+
+const chatClient = AgoraRTM.createInstance(APP_ID);
 
 type RoomType = {
   roomId: string,
@@ -19,11 +22,11 @@ type RoomType = {
 const Lobby = () => {
   const [roomsData, setRoomsData] = useState<RoomType[]>([] as RoomType[]);
   
-  const { client } = useAgora();
+  // const { chatClient } = useAgora();
 
-  const lobbyChannel = useRef(client.createChannel('lobby')).current;
+  const lobbyChannel = useRef(chatClient.createChannel('lobby')).current;
   const initRTM = async () => {
-    await client.login({uid, token});
+    await chatClient.login({uid, token});
     await lobbyChannel.join();
     
     lobbyChannel.getMembers()
@@ -36,59 +39,67 @@ const Lobby = () => {
   useEffect(() => {
     initRTM();
   }, [uid])
-  // const checkHeartBeat = async () => {
-  //   console.log("Checking hearbeat....");
-  //   let rooms_all = roomsData;
-  //   console.log(rooms_all);
+  const checkHeartBeat = async (roomsData: RoomType[]) => {
+    console.log("Checking hearbeat....");
+    let rooms_all = roomsData;
+    console.log(rooms_all);
+    console.log(roomsData);
     
-  //   for(let room of rooms_all){
-  //     let {roomId, members} = room;
-  //     let count = await client.getChannelMemberCount([roomId]);
-  //     console.log(count);
+    
+    
+    for(let room of rooms_all){
+      let {roomId, members} = room;
+      console.log(roomId);
       
-  //     if(count[roomId] < 1) {
-  //       setRoomsData((pre) => {
-  //         return pre.filter((room) => room.roomId === roomId)
-  //       })
-  //     }
-  //     else {
-  //       setRoomsData((pre) => {
-  //         return pre?.map((item) => {
-  //           if(item.roomId === roomId) {
-  //             return {...item, members: count[roomId]}
-  //           }
-  //           return item
-  //         })
-  //       })
-  //     }   
-  //   }
-  // }
-  // useEffect(() => {
-  //   const interval= setInterval(() => {
-  //     checkHeartBeat();
-  //   }, 2000);
-  //   return () => clearInterval(interval);
-  // }, [])
+      let count = await chatClient.getChannelMemberCount([roomId]);
+      console.log(count);
+      
+      if(count[roomId] < 1) {
+        setRoomsData((pre) => {
+          return pre.filter((room) => room.roomId !== roomId)
+        })
+      }
+      else {
+        console.log("set room data");
+        
+        setRoomsData((pre) => {
+          return pre?.map((item) => {
+            if(item.roomId === roomId) {
+              return {...item, members: count[roomId]}
+            }
+            return item
+          })
+        })
+      }   
+    }
+  }
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkHeartBeat(roomsData);
+    }, 1500);
+    return () => {
+      clearInterval(interval);
+    }
+  }, [roomsData, chatClient, lobbyChannel])
 
   const getRooms = async (roomId: string) => {
-    let attributes = await client.getChannelAttributesByKeys(roomId,['room_name', 'host']);
+    let attributes = await chatClient.getChannelAttributesByKeys(roomId,['room_name', 'host']);
     return attributes;
     
   }
   const handleMessageFromFeer = async (message: any, peerId: string) => {
     let messageData = JSON.parse(message.text);
-    console.log(messageData);
-    
-    let count = await client.getChannelMemberCount([messageData.room]);
+    let count = await chatClient.getChannelMemberCount([messageData.room]);
     console.log(count);
     let attributes = await getRooms(messageData.room);
     console.log(attributes);
+    console.log("called lobby");
     
     setRoomsData((pre: any) => {
-      const found = pre.find((item: any) => item.roomId === messageData.room);
+      let found = pre.find((item: any) => item.roomId === messageData.room);
       console.log(found);
       
-      if(!found) return [...pre, 
+      if(!found) return [...pre,
         {
           roomId: messageData.room, 
           members: count[messageData.room],
@@ -102,12 +113,13 @@ const Lobby = () => {
   }
 
   useEffect(() => {
-
-    client.on("MessageFromPeer", handleMessageFromFeer);      
-    return () => {
-      client.off("MessageFromPeer", handleMessageFromFeer);
-    }
-  }, [client, lobbyChannel])
+    console.log("hello hello");
+    
+    chatClient.on("MessageFromPeer", handleMessageFromFeer);      
+    // return () => {
+    //   chatClient.off("MessageFromPeer", handleMessageFromFeer);
+    // }
+  }, [chatClient, lobbyChannel])
 
   return (
     <div className='px-3 py-2'>

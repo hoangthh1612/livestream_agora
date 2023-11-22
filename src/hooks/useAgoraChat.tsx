@@ -5,6 +5,7 @@ let USER_ID = Math.floor(Math.random() * 232);
 let token : string | undefined;
 export default function useAgorachat(client: RtmClient, channelName: string) {
   const [joinState, setJoinState] = useState(false);
+  const [memberId, setMemberId] = useState<string>('' as string);
   const [messages, setMessages] = useState<any>([]);
   const [members, setMembers] = useState<any>([]);
   const [isHost, setIsHost] = useState(false);
@@ -34,7 +35,7 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
   
   //console.log(displayName);
   
-  const handleAddMember = async (memberId: string) => {
+  const handleAddMembers = async (memberId: string) => {
     let {name} = await client.getUserAttributesByKeys(memberId, ['name']);    
     setMembersPaticipate((pre: any) => ([...pre, { memberId, name}]));  
   }
@@ -71,14 +72,13 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
     displayName && await client.setLocalUserAttributes({
           name: displayName,
     });
-    console.log(displayName);
     
     channel.getMembers()
     .then((data) => {
       for(let item of data) {
         console.log("hahaha");
         
-        handleAddMember(item);
+        handleAddMembers(item);
       }
     })
     
@@ -133,12 +133,16 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
       }
     }
     const handleAddMember = async (memberId: string) => {
-      console.log(memberId);      
-      let { name } = await client.getUserAttributesByKeys(memberId, ['name']);
-      console.log(name);    
-      setMembersPaticipate((pre: any) => ([...pre, { memberId, name}]));  
+      console.log(memberId);
+      console.log("listener ....");
+      setMemberId(memberId);  
+      // const { name } = await client.getUserAttributesByKeys(memberId, ['name']);
+          
+      // setMembersPaticipate((pre: any) => ([...pre, { memberId, name}]));  
     }
+    
 
+    
     const handleUserLeft = async (memberId: string) => {
       console.log(memberId);
       setMembersPaticipate((pre: any) => {
@@ -157,13 +161,13 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
       console.log(participants[0]);
       console.log(USER_ID);
       await client.sendMessageToPeer({text: JSON.stringify({'room': channelName, 'type':'room_added'})}, memberId);
-      // if(participants[0] === USER_ID.toString()) {
-      //   let lobbyMembers = await lobbyChannel.getMembers();
-      //   for(let i = 0; i < lobbyMembers.length; i++) {
+      if(participants[0] === USER_ID.toString()) {
+        let lobbyMembers = await lobbyChannel.getMembers();
+        for(let i = 0; i < lobbyMembers.length; i++) {
           
-      //     client.sendMessageToPeer({text: JSON.stringify({'room': channelName, 'type':'room_added'})}, lobbyMembers[i]);
-      //   }
-      // }
+          client.sendMessageToPeer({text: JSON.stringify({'room': channelName, 'type':'room_added'})}, lobbyMembers[i]);
+        }
+      }
     }
 
     channel.on("MemberJoined", handleAddMember);
@@ -185,7 +189,24 @@ export default function useAgorachat(client: RtmClient, channelName: string) {
       
     }
   }, [channel, lobbyChannel, client]);
+
+  useEffect(() => {
+      const addNewMember = async () => {
+        const { name } = await client.getUserAttributesByKeys(memberId, ['name']);  
+        console.log(name);
+        
+        setMembersPaticipate((pre: any) => ([...pre, { memberId, name}]));  
+      }
+      const timeout = setTimeout(() => {
+        addNewMember();
+      }, 1000);
+      return () => {
+        clearTimeout(timeout);
+      }
+  }, [memberId])
   
+  console.log(membersPaticipate);
+
   async function sendChannelMessage(text: string) {
     console.log(text);
 

@@ -8,6 +8,7 @@ import VideoLivestream from '../VideoLivestream/VideoLivestream';
 import AgoraRTC, { IAgoraRTCRemoteUser, ILocalVideoTrack } from 'agora-rtc-sdk-ng';
 import useAgoraVideo from '../../hooks/useAgoraVideo';
 import ViewChart from '../ChartView/ChartView';
+import useAgora from '../../hooks/useAgora';
 
 
 
@@ -34,7 +35,7 @@ const rtcClient = AgoraRTC.createClient({codec: "vp8", mode: "live"});
 const Room = () => {
   const [channel, setChannel] = useState("default");
   const navigate = useNavigate();
-  
+  //const {chatClient } = useAgora();
   // const location = useLocation();
   // let params = new URLSearchParams(location.search);
   // console.log(params.get("room"));
